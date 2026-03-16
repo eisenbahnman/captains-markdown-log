@@ -6,8 +6,8 @@ from dataclasses import dataclass, field
 
 # Matches UL bullet: optional whitespace (spaces/tabs), then - + or *, then space
 _BULLET_RE = re.compile(r"^([ \t]*)[-+*] (.*)$")
-# Matches todo bullet: optional whitespace (spaces/tabs), then - [ ] or - [x], then space
-_TODO_RE = re.compile(r"^([ \t]*)[-+*] \[( |x|X)\] (.*)$", re.IGNORECASE)
+# Matches todo bullet: optional whitespace (spaces/tabs), then - [ ]/[x]/[>]/[-], then space
+_TODO_RE = re.compile(r"^([ \t]*)[-+*] \[( |x|X|>|-)\] (.*)$")
 # Matches timestamp at start of text: HH:MM
 _TIME_RE = re.compile(r"^(\d{1,2}:\d{2}) (.*)$")
 # Matches heading
@@ -21,9 +21,39 @@ class LogEntry:
     indent: int       # 0 = top level
 
 
+# Todo status constants
+TODO_OPEN = "open"
+TODO_DONE = "done"
+TODO_FORWARDED = "forwarded"
+TODO_CANCELED = "canceled"
+
+_STATUS_CYCLE = [TODO_OPEN, TODO_DONE, TODO_FORWARDED, TODO_CANCELED]
+
+_CHAR_TO_STATUS = {
+    " ": TODO_OPEN,
+    "x": TODO_DONE,
+    "X": TODO_DONE,
+    ">": TODO_FORWARDED,
+    "-": TODO_CANCELED,
+}
+
+STATUS_TO_CHAR = {
+    TODO_OPEN: " ",
+    TODO_DONE: "x",
+    TODO_FORWARDED: ">",
+    TODO_CANCELED: "-",
+}
+
+
+def next_todo_status(status: str) -> str:
+    """Return the next status in the cycle: open → done → forwarded → canceled → open."""
+    idx = _STATUS_CYCLE.index(status)
+    return _STATUS_CYCLE[(idx + 1) % len(_STATUS_CYCLE)]
+
+
 @dataclass
 class TodoItem:
-    checked: bool
+    status: str       # TODO_OPEN, TODO_DONE, TODO_FORWARDED, TODO_CANCELED
     text: str         # Raw text including any inline markdown
     indent: int       # 0 = top level
 
@@ -125,8 +155,8 @@ def parse_todos(lines: list[str]) -> list[TodoItem]:
             continue
         spaces, check_char, text = m.group(1), m.group(2), m.group(3)
         indent = _indent_level(spaces, unit)
-        checked = check_char.lower() == "x"
-        items.append(TodoItem(checked=checked, text=text, indent=indent))
+        status = _CHAR_TO_STATUS.get(check_char, TODO_OPEN)
+        items.append(TodoItem(status=status, text=text, indent=indent))
     return items
 
 

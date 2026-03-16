@@ -23,6 +23,8 @@ def apply_theme(
     _s["time"]      = Style(color=secondary)
     _s["todo_open"] = Style(color=success)
     _s["todo_done"] = Style(color=success)
+    _s["todo_fwd"]  = Style(color=accent)
+    _s["todo_cancel"] = Style(dim=True)
     _s["base_done"] = Style(dim=True, strike=True)
     _s["bold"]      = Style(bold=True, color=success)
     _s["italic"]    = Style(italic=True, color=error)
@@ -107,12 +109,20 @@ def render_log_line(time: str | None, text: str, indent: int) -> Text:
     return result
 
 
-def render_todo_line(checked: bool, text: str, indent: int) -> Text:
+def render_todo_line(status: str, text: str, indent: int) -> Text:
     """Render a single todo item line as Rich Text."""
+    from .parser import TODO_OPEN, TODO_DONE, TODO_FORWARDED, TODO_CANCELED
+
     result = Text(no_wrap=False, overflow="fold")
     result.append("  " * indent)
-    if checked:
+    if status == TODO_DONE:
         result.append("● ", style=_s["todo_done"])
+        result.append_text(apply_inline_markdown(text, base_style=_s["base_done"]))
+    elif status == TODO_FORWARDED:
+        result.append("▶ ", style=_s["todo_fwd"])
+        result.append_text(apply_inline_markdown(text))
+    elif status == TODO_CANCELED:
+        result.append("— ", style=_s["todo_cancel"])
         result.append_text(apply_inline_markdown(text, base_style=_s["base_done"]))
     else:
         result.append("○ ", style=_s["todo_open"])

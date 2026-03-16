@@ -6,7 +6,7 @@ from textual.widgets import Static, Label
 from textual.containers import VerticalScroll
 
 from ..renderer import render_todo_line
-from ..parser import TodoItem, _TODO_RE
+from ..parser import TodoItem, _TODO_RE, next_todo_status, STATUS_TO_CHAR, _CHAR_TO_STATUS
 from .base_editor import BaseEditor
 
 
@@ -22,16 +22,17 @@ class TodosEditor(BaseEditor):
         self.insert(prefix)
 
 
-def toggle_todo_in_raw(raw: str, index: int, check: bool) -> str:
-    """Toggle the Nth todo item (0-indexed) in raw section text."""
+def cycle_todo_in_raw(raw: str, index: int) -> str:
+    """Cycle the Nth todo item (0-indexed) to its next status."""
     lines = raw.splitlines(keepends=True)
     count = 0
     result = []
     for line in lines:
         m = _TODO_RE.match(line)
         if m and count == index:
-            new_check = "x" if check else " "
-            new_line = f"{m.group(1)}- [{new_check}] {m.group(3)}"
+            current_status = _CHAR_TO_STATUS.get(m.group(2), "open")
+            new_char = STATUS_TO_CHAR[next_todo_status(current_status)]
+            new_line = f"{m.group(1)}- [{new_char}] {m.group(3)}"
             if line.endswith("\n"):
                 new_line += "\n"
             result.append(new_line)
@@ -108,7 +109,7 @@ class TodosPane(Widget):
             return
         empty_msg.update("")
         for i, item in enumerate(items):
-            rich_text = render_todo_line(item.checked, item.text, item.indent)
+            rich_text = render_todo_line(item.status, item.text, item.indent)
             w = Static(rich_text, classes="todo-item-widget")
             if i == self._cursor_index:
                 w.add_class("todo-cursor")

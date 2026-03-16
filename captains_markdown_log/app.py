@@ -26,7 +26,7 @@ from .storage import (
 from .parser import parse_daily, reconstruct_file, DailyContent
 from .widgets.nav_bar import NavBar
 from .widgets.logs_pane import LogsPane
-from .widgets.todos_pane import TodosPane, toggle_todo_in_raw
+from .widgets.todos_pane import TodosPane, cycle_todo_in_raw
 from .renderer import apply_theme
 
 
@@ -271,8 +271,7 @@ class CaptainsLogApp(App):
         todos_pane = self.query_one("#todos-pane", TodosPane)
         idx = todos_pane.get_cursor_index()
         if 0 <= idx < len(self._daily_content.todos):
-            current = self._daily_content.todos[idx].checked
-            self._raw_todos = toggle_todo_in_raw(self._raw_todos, idx, not current)
+            self._raw_todos = cycle_todo_in_raw(self._raw_todos, idx)
             self._save_and_reload()
 
     def action_expand_logs(self) -> None:
