@@ -1,0 +1,40 @@
+/* Captain's Log TUI — gruvbox dark */
+
+Screen {
+    layout: vertical;
+}
+
+NavBar {
+    height: 1;
+    dock: top;
+    padding: 0 1;
+}
+
+#main-area {
+    layout: horizontal;
+    height: 1fr;
+    padding: 1 1 0 1;
+}
+
+LogsPane {
+    width: 50%;
+    padding-right: 1;
+}
+
+TodosPane {
+    width: 1fr;
+    padding-left: 1;
+}
+
+#logs-box {
+    height: 1fr;
+}
+
+#todos-box {
+    height: 1fr;
+}
+
+Footer {
+    height: 1;
+    dock: bottom;
+}

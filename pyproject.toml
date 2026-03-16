@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "captains-markdown-log"
+version = "0.1.0"
+description = "A TUI daily journal and task manager"
+requires-python = ">=3.11"
+dependencies = [
+    "textual>=0.70.0",
+]
+
+[project.scripts]
+cml = "captains_markdown_log.app:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["captains_markdown_log"]
