@@ -33,15 +33,21 @@ class BaseEditor(TextArea):
     def _indent_current_line(self) -> None:
         row, col = self.cursor_location
         line = self.document.get_line(row)
-        self.replace("    " + line, (row, 0), (row, len(line)))
-        self.move_cursor((row, col + 4))
+        self.replace("\t" + line, (row, 0), (row, len(line)))
+        self.move_cursor((row, col + 1))
 
     def _dedent_current_line(self) -> None:
         row, col = self.cursor_location
         line = self.document.get_line(row)
-        if line.startswith("    "):
+        if line.startswith("\t"):
+            self.replace(line[1:], (row, 0), (row, len(line)))
+            self.move_cursor((row, max(0, col - 1)))
+        elif line.startswith("    "):
             self.replace(line[4:], (row, 0), (row, len(line)))
             self.move_cursor((row, max(0, col - 4)))
+        elif line.startswith("   "):
+            self.replace(line[3:], (row, 0), (row, len(line)))
+            self.move_cursor((row, max(0, col - 3)))
         elif line.startswith("  "):
             self.replace(line[2:], (row, 0), (row, len(line)))
             self.move_cursor((row, max(0, col - 2)))

@@ -19,12 +19,12 @@ class LogsEditor(BaseEditor):
         row, col = self.cursor_location
         line = self.document.get_line(row)
         stripped = line.lstrip()
-        indent_len = len(line) - len(stripped)
-        if indent_len == 0:
+        leading_ws = line[: len(line) - len(stripped)]
+        if not leading_ws:
             now = datetime.now(CET_TZ)
             prefix = f"\n- {now.strftime('%H:%M')} "
         else:
-            prefix = f"\n{' ' * indent_len}- "
+            prefix = f"\n{leading_ws}- "
         self.insert(prefix)
 
 
@@ -110,6 +110,12 @@ class LogsPane(Widget):
         scroll.display = True
         editor.display = False
         return text
+
+    def scroll_up(self) -> None:
+        self.query_one("#logs-scroll", VerticalScroll).scroll_up(animate=False)
+
+    def scroll_down(self) -> None:
+        self.query_one("#logs-scroll", VerticalScroll).scroll_down(animate=False)
 
     def is_editing(self) -> bool:
         return self.query_one("#logs-editor", LogsEditor).display

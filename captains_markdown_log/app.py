@@ -55,6 +55,7 @@ class CaptainsLogApp(App):
         Binding("plus", "expand_logs", "logs +", show=False),
         Binding("equals", "expand_logs", "logs +", show=False),
         Binding("minus", "shrink_logs", "logs -", show=False),
+        Binding("t", "jump_today", "today", show=True),
         Binding("q", "quit", "quit", show=True),
     ]
 
@@ -98,6 +99,7 @@ class CaptainsLogApp(App):
             error=t.error or "#F7768E",
             secondary=t.secondary or "#7AA2F7",
             accent=t.accent or "#FF9E64",
+            background=t.background or "#1a1b26",
         )
 
     # ── Data loading ────────────────────────────────────────────────────────
@@ -191,6 +193,11 @@ class CaptainsLogApp(App):
         if d:
             self._load_date(d)
 
+    def action_jump_today(self) -> None:
+        if self._editing:
+            return
+        self._load_date(date.today())
+
     def action_cycle_pane(self) -> None:
         if self._editing:
             return
@@ -241,14 +248,20 @@ class CaptainsLogApp(App):
             self._load_date(self._current_date)
 
     def action_todo_up(self) -> None:
-        if self._editing or self._active_pane != "todos":
+        if self._editing:
             return
-        self.query_one("#todos-pane", TodosPane).move_cursor_up()
+        if self._active_pane == "todos":
+            self.query_one("#todos-pane", TodosPane).move_cursor_up()
+        elif self._active_pane == "logs":
+            self.query_one("#logs-pane", LogsPane).scroll_up()
 
     def action_todo_down(self) -> None:
-        if self._editing or self._active_pane != "todos":
+        if self._editing:
             return
-        self.query_one("#todos-pane", TodosPane).move_cursor_down()
+        if self._active_pane == "todos":
+            self.query_one("#todos-pane", TodosPane).move_cursor_down()
+        elif self._active_pane == "logs":
+            self.query_one("#logs-pane", LogsPane).scroll_down()
 
     def action_toggle_todo(self) -> None:
         if self._editing or self._active_pane != "todos":

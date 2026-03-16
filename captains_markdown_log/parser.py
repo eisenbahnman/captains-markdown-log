@@ -4,10 +4,10 @@ import re
 from dataclasses import dataclass, field
 
 
-# Matches UL bullet: optional spaces, then - + or *, then space
-_BULLET_RE = re.compile(r"^( *)[-+*] (.*)$")
-# Matches todo bullet: optional spaces, then - [ ] or - [x], then space
-_TODO_RE = re.compile(r"^( *)[-+*] \[( |x|X)\] (.*)$", re.IGNORECASE)
+# Matches UL bullet: optional whitespace (spaces/tabs), then - + or *, then space
+_BULLET_RE = re.compile(r"^([ \t]*)[-+*] (.*)$")
+# Matches todo bullet: optional whitespace (spaces/tabs), then - [ ] or - [x], then space
+_TODO_RE = re.compile(r"^([ \t]*)[-+*] \[( |x|X)\] (.*)$", re.IGNORECASE)
 # Matches timestamp at start of text: HH:MM
 _TIME_RE = re.compile(r"^(\d{1,2}:\d{2}) (.*)$")
 # Matches heading
@@ -37,7 +37,11 @@ class DailyContent:
 
 
 def _detect_indent_unit(lines: list[str]) -> int:
-    """Detect the minimum indent unit (in spaces) used in lines."""
+    """Detect the minimum indent unit (in spaces) used in lines.
+
+    Only examines space-based indentation; tab indentation is handled
+    separately in _indent_level().
+    """
     indents = set()
     for line in lines:
         m = re.match(r"^( +)", line)
@@ -46,11 +50,18 @@ def _detect_indent_unit(lines: list[str]) -> int:
     if not indents:
         return 2
     min_indent = min(indents)
-    return max(min_indent, 1)
+    return max(min_indent, 2)
 
 
-def _indent_level(spaces: str, unit: int) -> int:
-    return len(spaces) // unit
+def _indent_level(whitespace: str, unit: int) -> int:
+    """Calculate indent level from leading whitespace.
+
+    Each tab counts as one indent level.  For spaces the detected
+    *unit* (2, 3 or 4) is used to derive the level.
+    """
+    if "\t" in whitespace:
+        return whitespace.count("\t")
+    return len(whitespace) // unit
 
 
 def _extract_section(content: str, heading: str) -> tuple[str, list[str]]:

@@ -17,8 +17,8 @@ class TodosEditor(BaseEditor):
         row, col = self.cursor_location
         line = self.document.get_line(row)
         stripped = line.lstrip()
-        indent_len = len(line) - len(stripped)
-        prefix = f"\n{' ' * indent_len}- [ ] "
+        leading_ws = line[: len(line) - len(stripped)]
+        prefix = f"\n{leading_ws}- [ ] "
         self.insert(prefix)
 
 

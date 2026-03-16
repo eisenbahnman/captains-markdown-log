@@ -16,6 +16,7 @@ def apply_theme(
     error: str,
     secondary: str,
     accent: str,
+    background: str,
 ) -> None:
     """Rebuild all renderer styles from theme colors."""
     _s["bullet"]    = Style(color=accent)
@@ -26,7 +27,7 @@ def apply_theme(
     _s["bold"]      = Style(bold=True, color=success)
     _s["italic"]    = Style(italic=True, color=error)
     _s["strike"]    = Style(strike=True)
-    _s["hl"]        = Style(bgcolor=warning)
+    _s["hl"]        = Style(bgcolor=warning, color=background)
     _s["ul"]        = Style(underline=True)
     _s["ul_link"]   = Style(underline=True, color=secondary)
 
@@ -38,6 +39,7 @@ apply_theme(
     error="#F7768E",
     secondary="#7AA2F7",
     accent="#FF9E64",
+    background="#1a1b26",
 )
 
 
