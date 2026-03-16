@@ -25,6 +25,7 @@ A TUI daily journal and task manager. Daily notes stored as `YYYY-MM-DD.md` file
 | `l` / `Right` | Next day |
 | `[` | Jump to nearest previous entry |
 | `]` | Jump to nearest next entry |
+| `t` | Jump to today |
 | `Tab` | Switch pane |
 
 ### Editing
